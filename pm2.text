@@ -1,6 +1,6 @@
 
 pm2 start server.js --name app-comercial-ste
-pm2 delete appcomercial-ste
+pm2 delete app-comercial-ste
 pm2 restart api-pm2
 pm2 logs api-pm2
 npm start
