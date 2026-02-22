@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gráfico de Carga por Máquina</title>
+
+  <link rel="icon" href="https://santelisa.com.br/wp-content/themes/2024_santelisa/assets/ico/favicon-32x32.png">
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- Chart.js + plugin datalabels -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+
+  <!-- DataTables + Botões -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
+
+  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+
+  <link rel="stylesheet" href="/css/grafico-cm.css">
+
+  <style>
+    .chart-container {
+      position: relative;
+      height: 300px;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-center w-100">📊 Carga por Máquina</h2>
+    <button class="btn btn-secondary position-absolute start-0 ms-3" onclick="voltarParaMenu()">⬅️ Voltar</button>
+  </div>
+
+  <div class="text-center mb-3">
+    <button id="btnMostrarFiltros" class="btn btn-outline-primary btn-sm">⚙️ Filtros Avançados</button>
+  </div>
+  
+  <form id="filterForm" method="POST" action="/comercial/grafico-cm" class="filter-container row g-3 d-none">
+    <div class="col-md-2">
+      <label class="form-label">Data Inicial</label>
+      <input type="date" name="startDate" class="form-control" value="<%= filtros_aplicados.startDate %>" required>
+    </div>
+    <div class="col-md-2">
+      <label class="form-label">Data Final</label>
+      <input type="date" name="endDate" class="form-control" value="<%= filtros_aplicados.endDate %>" required>
+    </div>
+    <div class="col-md-2">
+      <label class="form-label">Tipo de Análise</label>
+      <select name="tipoData" class="form-select">
+        <option value="entrega" <%= (filtros_aplicados.tipoData === 'entrega' || !filtros_aplicados.tipoData) ? 'selected' : '' %>>
+          Entrada de Pedido
+        </option>
+        <option value="comercial" <%= filtros_aplicados.tipoData === 'comercial' ? 'selected' : '' %>>
+          Implantação Comercial
+        </option>
+      </select>
+    </div>
+    <div class="col-md-2">
+      <label class="form-label">Carga Máquina</label>
+      <select name="filtroSelect" class="form-select">
+        <% ['Implantado', 'À Programar', 'À Produzir', 'Ondulado', 'Produzido', 'Na Expedição', 'Saldo', 'Expedida', 'N/A'].forEach(option => { %>
+          <option value="<%= option %>" <%= filtros_aplicados.filtro === option ? 'selected' : '' %>><%= option %></option>
+        <% }) %>
+      </select>
+    </div>
+    <div class="col-md-2">
+      <label class="form-label">Entrega</label>
+      <select name="tipoEntrega" class="form-select">
+        <% ['CIF + FOB', 'CIF', 'FOB'].forEach(option => { %>
+          <option value="<%= option %>" <%= filtros_aplicados.entrega === option ? 'selected' : '' %>><%= option %></option>
+        <% }) %>
+      </select>
+    </div>
+    <div class="col-md-2">
+      <label class="form-label">Família</label>
+      <select name="familia" class="form-select">
+        <% ['Todas', 'Caixa Maleta', 'Caixa CV', 'Chapa', 'Acessório', 'Bobina Simplex'].forEach(option => { %>
+          <option value="<%= option %>" <%= filtros_aplicados.familia === option ? 'selected' : '' %>><%= option %></option>
+        <% }) %>
+      </select>
+    </div>
+    <div class="col-md-1">
+      <label class="form-label">Ativo</label>
+      <select name="ativo" class="form-select">
+        <option value="Sim" <%= filtros_aplicados.ativo === 'Sim' ? 'selected' : '' %>>Sim</option>
+        <option value="Não" <%= filtros_aplicados.ativo === 'Não' ? 'selected' : '' %>>Não</option>
+      </select>
+    </div>
+    <div class="col-md-1">
+      <label class="form-label">Atraso</label>
+      <select name="atraso" class="form-select">
+        <option value="Todas" <%= filtros_aplicados.atraso === 'Todas' ? 'selected' : '' %>>Todas</option>
+        <option value="Sim" <%= filtros_aplicados.atraso === 'Sim' ? 'selected' : '' %>>Sim</option>
+        <option value="Não" <%= filtros_aplicados.atraso === 'Não' ? 'selected' : '' %>>Não</option>
+      </select>
+    </div>
+    <div class="col-12 d-flex justify-content-center mt-3">
+      <button id="botaoAplicar" type="submit" class="btn btn-primary me-2">
+        <i class="bi bi-funnel"></i> Aplicar Filtros
+      </button>
+    </div>
+  </form>
+
+  <div id="graficos"></div>
+
+  <div class="mt-3">
+    <span class="fw-bold">🛠️</span> Dia com Manutenção Programada
+  </div>
+</div>
+
+<!-- Modal para Detalhes do Pedido -->
+<div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="detailsModalLabel">Detalhes dos Pedidos</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body">
+        <div class="table-responsive">
+          <table id="tabelaDetalhes" class="table table-sm table-bordered table-striped w-100">
+            <thead class="table-primary">
+              <tr>
+                <th>Pedido</th>
+                <th>Item</th>
+                <th>Referência</th>
+                <th>Cliente</th>
+                <th>CIF/FOB</th>
+                <th class="text-end">Qtd Pedido</th>
+                <th class="text-end">Peso Líq</th>
+                <th>Implantação</th>
+                <th>Dias</th>
+                <th>Máq. 1</th>
+                <th>Máq. 2</th>
+              </tr>
+            </thead>
+            <tbody id="detailsTableBody"></tbody>
+            <tfoot class="table-light fw-bold">
+              <tr>
+                <td colspan="5" class="text-end">Totais:</td>
+                <td class="text-end" id="totalQtdPedido">0</td>
+                <td class="text-end" id="totalPeso">0</td>
+                <td colspan="4"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para Detalhes da Manutenção -->
+<div class="modal fade" id="maintenanceDetailsModal" tabindex="-1" aria-labelledby="maintenanceDetailsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="maintenanceDetailsModalLabel">Detalhes da Manutenção</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body">
+        <div class="table-responsive">
+          <table id="tabelaManutencao" class="table table-sm table-bordered table-striped w-100">
+            <thead class="table-secondary">
+              <tr>
+                <th>Tipo</th>
+                <th>Descrição</th>
+                <th>Equipamento</th>
+                <th class="text-end">Tempo (h)</th>
+                <th>Situação</th>
+              </tr>
+            </thead>
+            <tbody id="maintenanceDetailsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Campos ocultos e scripts -->
+<input type="hidden" id="startDateHidden" value="<%= filtros_aplicados.startDate %>">
+<input type="hidden" id="endDateHidden" value="<%= filtros_aplicados.endDate %>">
+
+<script>
+  const dadosMaquinas = <%- JSON.stringify(dados) %>;
+  const manutencoes = <%- JSON.stringify(manutencoes) %>;
+</script>
+
+<script src="/js/grafico-cm.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  function voltarParaMenu() {
+    window.location.href = "/comercial";
+  }
+
+  document.getElementById('btnMostrarFiltros')?.addEventListener('click', function(e) {
+    e.preventDefault();
+    document.getElementById('filterForm').classList.toggle('d-none');
+  });
+</script>
+
+</body>
+</html>
+

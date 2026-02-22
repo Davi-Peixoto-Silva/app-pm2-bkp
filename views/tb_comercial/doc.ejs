@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Santelisa | Documentação Oficial</title>
+    <link rel="icon" href="https://santelisa.com.br/wp-content/themes/2024_santelisa/assets/ico/favicon-32x32.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #64748b;
+            --bg: #f8fafc;
+            --text: #1e293b;
+            --border: #e2e8f0;
+            --white: #ffffff;
+            --accent: #3b82f6;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            display: flex;
+        }
+
+        /* Sidebar Navegação */
+        nav {
+            width: 280px;
+            background: var(--white);
+            height: 100vh;
+            position: fixed;
+            border-right: 1px solid var(--border);
+            padding: 2rem 1rem;
+            overflow-y: auto;
+        }
+
+        .logo-area {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--bg);
+        }
+
+        .logo-area img { max-width: 120px; }
+
+        nav h4 {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--secondary);
+            margin: 1.5rem 0 0.5rem 0.5rem;
+            letter-spacing: 0.05em;
+        }
+
+        nav a {
+            display: block;
+            padding: 0.75rem 1rem;
+            color: var(--text);
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        nav a:hover {
+            background: var(--bg);
+            color: var(--primary);
+        }
+
+        /* Conteúdo Principal */
+        main {
+            margin-left: 280px;
+            padding: 3rem 5%;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            color: white;
+            padding: 3rem;
+            border-radius: 16px;
+            margin-bottom: 3rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 { font-size: 2.5rem; margin-bottom: 1rem; }
+        h2 { font-size: 1.8rem; color: var(--primary-dark); margin: 3rem 0 1.5rem; border-left: 5px solid var(--primary); padding-left: 1rem; }
+        h3 { font-size: 1.4rem; margin: 2rem 0 1rem; display: flex; align-items: center; gap: 10px; }
+        h4 { color: var(--secondary); margin-bottom: 0.5rem; }
+
+        p { margin-bottom: 1.2rem; color: #475569; }
+
+        /* Grid de Módulos */
+        .module-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .card {
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            transition: transform 0.2s;
+        }
+
+        .card:hover { transform: translateY(-5px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+
+        .card i { color: var(--primary); font-size: 1.5rem; margin-bottom: 1rem; }
+
+        /* Tabelas */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--white);
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 2rem 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        th, td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--border); }
+        th { background-color: #f1f5f9; font-weight: 600; color: var(--secondary); }
+
+        /* Badge/Code */
+        code {
+            background: #f1f5f9;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #e11d48;
+            font-size: 0.9em;
+        }
+
+        .img-container {
+            background: #eee;
+            border-radius: 8px;
+            padding: 10px;
+            display: inline-block;
+            margin: 10px 5px;
+        }
+
+        .img-container img { border-radius: 4px; max-width: 100%; height: auto; }
+
+        footer {
+            margin-top: 5rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            color: var(--secondary);
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            nav { display: none; }
+            main { margin-left: 0; padding: 1.5rem; }
+        }
+		
+		/* Estilo do Botão de Impressão */
+.print-button {
+    background-color: var(--white);
+    color: var(--primary);
+    border: 1px solid var(--primary);
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.print-button:hover {
+    background-color: var(--primary);
+    color: var(--white);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo-area">
+		 <img src="https://santelisa.com.br/wp-content/themes/2024_santelisa/assets/ico/favicon-32x32.png" alt="Logo Sistema" style="width: 30px;">
+            
+            <p style="font-weight: 600; margin-top: 10px;">SANTELISA ERP</p>
+     	 </div>
+		 
+		     <a href="javascript:history.back()" class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-left"></i> Voltar
+    </a>
+	<div class="no-print" style="display: center; justify-content: flex-end; margin-bottom: 10px;">
+        <button onclick="window.print()" class="print-button">
+            <i class="fa-solid fa-print"></i> Imprimir Manual
+        </button>
+    </div>
+        
+        <h4>Manual do Usuário</h4>
+        <a href="#visao-geral"><i class="fa-solid fa-eye mr-2"></i> Visão Geral</a>
+        <a href="#navegacao"><i class="fa-solid fa-compass"></i> Navegação</a>
+        
+        <h4>Funcionalidades</h4>
+        <a href="#pcp"><i class="fa-solid fa-industry"></i> PCP & Produção</a>
+        <a href="#comercial"><i class="fa-solid fa-briefcase"></i> Comercial</a>
+        <a href="#expedicao"><i class="fa-solid fa-truck-fast"></i> Expedição & Estoque</a>
+        <a href="#financeiro"><i class="fa-solid fa-file-invoice-dollar"></i> Faturamento</a>
+        
+        <h4>TI & Referência</h4>
+        <a href="#arquitetura"><i class="fa-solid fa-code"></i> Arquitetura</a>
+        <a href="#seguranca"><i class="fa-solid fa-shield-halved"></i> Segurança</a>
+
+    </nav>
+
+    <main>
+
+	
+        <section class="hero">
+            <h1>📘 Sistema Integrado Santelisa</h1>
+            <p>A plataforma central de inteligência operacional e financeira (ERP / TRIM).</p>
+        </section>
+
+        <section id="visao-geral">
+            <h2>Parte 1: Guia do Usuário</h2>
+            <h3><i class="fa-solid fa-circle-info"></i> 1. O que é o Sistema?</h3>
+            <p>O <strong>Portal Santelisa</strong> é um hub centralizador de informações. Ele elimina a necessidade de consultar múltiplos sistemas separadamente, consolidando dados operacionais, comerciais e financeiros em uma única interface web moderna.</p>
+            
+            <div class="card" style="background: #eff6ff; border: 1px solid #bfdbfe;">
+                <strong>💡 Integração Total:</strong> O sistema "conversa" em tempo real com o <strong>Datasul (ERP)</strong>, <strong>Trimbox</strong> e <strong>Trimpaper</strong>, garantindo que a informação na tela seja sempre a mais atualizada.
+            </div>
+
+            <div class="img-container">
+                <img src="https://app.grupotelles.com:8007/api/arquivo?directory=D:/SHARES/Santelisa/icon/Sistema.png&download=0" alt="Logo Sistema" style="width: 80px;">
+            </div>
+        </section>
+
+        <section id="navegacao">
+            <h3><i class="fa-solid fa-map"></i> 2. Navegação e Dashboards</h3>
+            <p>Ao entrar no sistema, você terá acesso ao Dashboard Inicial, que contém atalhos rápidos e indicadores de performance (KPIs).</p>
+            
+            <div class="module-grid">
+                <div class="card">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <h4>BI Integrado</h4>
+                    <p>Relatórios do Power BI embutidos para análise de tendências sem sair do portal.</p>
+                </div>
+                <div class="card">
+                    <i class="fa-solid fa-bolt"></i>
+                    <h4>Acesso Rápido</h4>
+                    <p>Links diretos para as áreas de maior fluxo: Faturamento e Produção.</p>
+                </div>
+            </div>
+
+            <div class="img-container">
+                <img src="https://app.grupotelles.com:8007/api/arquivo?directory=D:/SHARES/Santelisa/icon/fat.png&download=0" alt="Dashboard Faturamento">
+            </div>
+            <div class="img-container">
+                <img src="https://app.grupotelles.com:8007/api/arquivo?directory=D:/SHARES/Santelisa/icon/prod.png&download=0" alt="Dashboard Produção">
+            </div>
+        </section>
+
+        <hr style="margin: 4rem 0; border: 0; border-top: 1px solid var(--border);">
+
+        <section id="funcionalidades">
+            <h2>Parte 2: Módulos Operacionais</h2>
+            
+            <div id="pcp">
+                <h3><i class="fa-solid fa-microchip"></i> PCP - Planejamento e Produção</h3>
+                <p>Monitore o status de cada máquina da planta em tempo real. O sistema lista ordens em execução, paradas e eficiência de equipamentos como:</p>
+                <ul>
+                    <li>Onduladeiras 01 e 02</li>
+                    <li>Tomasoni (Flexo, CV, 02) e Sundemba</li>
+                    <li>Processos de acabamento (Amarradeira, Grampeadeira, Simplex)</li>
+                </ul>
+            </div>
+
+            <div id="comercial" style="margin-top: 3rem;">
+                <h3><i class="fa-solid fa-handshake"></i> Gestão Comercial e Carga de Máquina</h3>
+                <p>O módulo de <strong>Carga por Máquina (CM)</strong> é a ferramenta estratégica para o setor de vendas.</p>
+                <div class="card">
+                    <h4>Destaques do Módulo:</h4>
+                    <ul style="margin-left: 20px;">
+                        <li><strong>Visibilidade:</strong> Carga planejada vs. Capacidade real de entrega.</li>
+                        <li><strong>Filtros Dinâmicos:</strong> Filtre por data de entrega, status do pedido, família de produto ou representante.</li>
+                        <li><strong>Manutenção:</strong> Ícones visuais alertam sobre paradas programadas, evitando promessas de prazos irreais.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="expedicao" style="margin-top: 3rem;">
+                <h3><i class="fa-solid fa-boxes-stacked"></i> Expedição, Estoque e Inventário</h3>
+                <p>Ferramentas de auditoria para garantir que o estoque físico condiz com o sistêmico.</p>
+                <div class="module-grid">
+                    <div class="card">
+                        <h4>Conciliação Automática</h4>
+                        <p>Compara <strong>Trimbox vs Datasul</strong> e aponta divergências instantaneamente.</p>
+                    </div>
+                    <div class="card">
+                        <h4>Inventário Histórico</h4>
+                        <p>Consulte a posição de estoque (Bobinas/Aparas) de qualquer data retroativa através da procedure <code>ps_RelatBobinasEstoque</code>.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="financeiro" style="margin-top: 3rem;">
+                <h3><i class="fa-solid fa-file-invoice-dollar"></i> Faturamento e Logística</h3>
+                <p>Visão financeira completa com comparativos automáticos em relação ao mês/ano anterior.</p>
+                <ul>
+                    <li><strong>Documentos:</strong> Busca automática de PDF de Notas Fiscais e Boletos.</li>
+                    <li><strong>Download Inteligente:</strong> Se o arquivo não estiver no servidor local, o sistema aciona automaticamente a API de origem para recuperá-lo.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="tecnico">
+            <h2>Parte 3: Documentação Técnica</h2>
+            
+            <div id="arquitetura">
+                <h3><i class="fa-solid fa-gears"></i> Arquitetura do Sistema</h3>
+                <p>Desenvolvido em ambiente robusto focado em performance e escalabilidade.</p>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Camada</th>
+                            <th>Tecnologia</th>
+                            <th>Descrição</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Backend</strong></td>
+                            <td>Node.js + Express</td>
+                            <td>Processamento lógico e rotas.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Query Builder</strong></td>
+                            <td>Knex.js</td>
+                            <td>Construção de consultas SQL seguras.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Frontend</strong></td>
+                            <td>EJS + JavaScript + CSS 3</td>
+                            <td>Renderização dinâmica de dados.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Autenticação</strong></td>
+                            <td>Active Directory (AD)</td>
+                            <td>Integração com login de rede corporativo.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="seguranca" style="margin-top: 2rem;">
+                <h3><i class="fa-solid fa-lock"></i> Segurança e Dados</h3>
+                <ul>
+                    <li><strong>Sessão:</strong> Gerenciada via <code>express-session</code> com expiração automática.</li>
+                    <li><strong>Proteção:</strong> Middleware <code>verificarAutenticacao</code> aplicado a todas as rotas sensíveis.</li>
+                    <li><strong>Integração SQL:</strong> O sistema consome dados dos bancos <strong>APP, DTW, STE, TRIM e TRIMP</strong>.</li>
+                </ul>
+            </div>
+        </section>
+
+        <footer>
+            <p>&copy; 2025 Santelisa - Portal de Sistemas Integrados | Desenvolvido para Excelência Operacional</p>
+        </footer>
+    </main>
+
+    <script>
+        // Smooth scroll simples
+        document.querySelectorAll('nav a').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                document.querySelector(targetId).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>

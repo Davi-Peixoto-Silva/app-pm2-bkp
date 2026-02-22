@@ -1,0 +1,157 @@
+body {
+  background-color: #f4f6f9;
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.dashboard-header {
+  margin-bottom: 30px;
+}
+
+/* Container dos cards KPI */
+.kpi-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+/* Cards KPI */
+.kpi-card {
+  flex: 1 1 260px;
+  max-width: 300px;
+  min-height: 160px;
+  padding: 20px;
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 16px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.07);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: transform 0.2s ease-in-out;
+}
+.kpi-card:hover {
+  transform: translateY(-4px);
+}
+.kpi-icon i {
+  font-size: 24px;
+  color: #0d6efd;
+}
+.kpi-label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #6c757d;
+  margin-top: 8px;
+}
+.kpi-value {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #212529;
+  margin-top: 4px;
+}
+.kpi-footer {
+  font-size: 0.875rem;
+  color: #6c757d;
+  margin-top: 6px;
+}
+
+/* Cores */
+.text-positive {
+  color: #198754;
+  font-weight: bold;
+}
+.text-negative {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+/* Títulos de seção */
+.section-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 40px 0 20px;
+}
+
+/* Tabelas */
+.table {
+  background-color: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.table th, .table td {
+  text-align: center;
+  vertical-align: middle;
+  font-size: 0.95rem;
+  padding: 12px 8px;
+}
+
+.table thead th {
+  background-color: #e9ecef;
+  font-weight: 600;
+  color: #495057;
+}
+
+.table tfoot td {
+  background-color: #f8f9fa;
+  font-weight: bold;
+}
+
+/* Botões */
+.btn-outline-dark {
+  font-weight: 500;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.9rem;
+  transition: all 0.3s ease-in-out;
+}
+.btn-outline-dark:hover {
+  background-color: #0d6efd;
+  color: white;
+  border-color: #0d6efd;
+}
+.btn-outline-secondary {
+  border-radius: 10px;
+  font-size: 0.9rem;
+  padding: 6px 12px;
+}
+
+/* Espaçamento e alinhamento de botões */
+.mb-3.text-end {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+/* DataTables Botões */
+.dt-buttons .btn {
+  margin-right: 6px;
+  margin-bottom: 10px;
+  border-radius: 6px !important;
+  font-size: 0.875rem !important;
+  font-weight: 500;
+  background-color: #e9ecef;
+  color: #212529;
+  border: 1px solid #ced4da;
+}
+.dt-buttons .btn:hover {
+  background-color: #0d6efd;
+  color: white;
+  border-color: #0d6efd;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .kpi-card {
+    max-width: 100%;
+    min-height: 140px;
+  }
+  .mb-3.text-end {
+    align-items: stretch;
+  }
+}
