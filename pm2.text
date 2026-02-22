@@ -1,0 +1,7 @@
+
+pm2 start server.js --name api-pm2
+pm2 delete api-pm2
+pm2 restart api-pm2
+pm2 logs api-pm2
+npm start
+
