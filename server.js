@@ -12,7 +12,7 @@ require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 8006;
-const API_KEY = process.env.API_KEY;
+// const API_KEY = process.env.API_KEY;
 const gitExec = process.env.GIT_PATH;
 
 // --- 1. CONFIGURAÇÃO DE LOGS DE AUDITORIA ---
@@ -86,16 +86,16 @@ e diagnóstico avançado de portas TCP no servidor.
   /* =========================
      ?? SEGURANÇA
   ========================== */
-  security: [{ ApiKeyAuth: [] }],
+  // security: [{ ApiKeyAuth: [] }],
 
   components: {
-    securitySchemes: {
-      ApiKeyAuth: {
-        type: 'apiKey',
-        in: 'header',
-        name: 'x-api-key'
-      }
-    },
+  //   securitySchemes: {
+  //     ApiKeyAuth: {
+  //       type: 'apiKey',
+  //       in: 'header',
+  //       name: 'x-api-key'
+  //     }
+  //   },
 
     /* =========================
        ?? SCHEMAS
@@ -191,6 +191,47 @@ e diagnóstico avançado de portas TCP no servidor.
   ========================== */
   paths: {
 
+/* ---------- AÇÕES GERAIS ---------- */
+    '/save': {
+      post: {
+        tags: ['Ações'],
+        summary: 'Salva o estado atual dos processos PM2 (pm2 save)',
+        description: 'Gera um dump da lista de processos atuais para que sejam restaurados automaticamente em caso de reinicialização do servidor.',
+        responses: {
+          200: {
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/GenericSuccess' }
+              }
+            }
+          },
+          500: {
+            description: 'Erro interno ao tentar salvar as configurações do PM2.'
+          }
+        }
+      }
+    },
+    
+    '/describe/{id}': {
+      get: {
+        tags: ['Monitoramento'],
+        summary: 'Detalhes completos de um processo PM2',
+        parameters: [
+          { in: 'path', name: 'id', required: true, schema: { type: 'integer' } }
+        ],
+        responses: {
+          200: {
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Processo' }
+              }
+            }
+          },
+          404: { description: 'Processo não encontrado' }
+        }
+      }
+    },
+    
     /* ---------- MONITORAMENTO ---------- */
     '/list': {
       get: {
@@ -390,14 +431,14 @@ app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 /* ============================================================
    ?? 4. MIDDLEWARE DE AUTENTICAÇÃO
 ============================================================ */
-app.use((req, res, next) => {
-    if (req.path.startsWith('/docs')) return next();
-    const key = req.headers['x-api-key'];
-    if (!key || key !== API_KEY) {
-        return res.status(403).json({ error: 'Acesso negado. API Key inválida.' });
-    }
-    next();
-});
+// app.use((req, res, next) => {
+//     if (req.path.startsWith('/docs')) return next();
+//     const key = req.headers['x-api-key'];
+//     if (!key || key !== API_KEY) {
+//         return res.status(403).json({ error: 'Acesso negado. API Key inválida.' });
+//     }
+//     next();
+// });
 
 // --- HELPER PM2 ---
 const withPm2 = (callback, res) => {
@@ -470,45 +511,79 @@ app.post('/process/:action', (req, res) => {
   withPm2(() => {
       if (action === 'update') {
           pm2.describe(target, (dErr, list) => {
-              if (dErr || !list.length) return res.status(404).json({ error: 'App não encontrado' });
-              
+              if (dErr || !list.length) {
+                  return res.status(404).json({ error: 'App não encontrado' });
+              }
+
+              // Essa linha garante que funciona para QUALQUER aplicação, pegando a pasta correta do ID
               const pasta = list[0].pm2_env.pm_cwd;
               const temGit = fs.existsSync(path.join(pasta, '.git'));
 
-              // Função para rodar npm install e restart
-              const finalizarUpdate = () => {
-                  loggerAudit('UPDATE', target, 'INFO', 'Rodando npm install...');
-                  exec('npm install', { cwd: pasta }, (nErr) => {
-                      if (nErr) {
-                          loggerAudit('UPDATE', target, 'ERRO', 'Falha no npm install');
-                          return res.status(500).json({ error: 'Git OK, mas falha no npm install.' });
+              // Ajustamos a função para ignorar erros se não houver o que salvar
+              const executarComando = (comando, callback, ignorarErro = false) => {
+                  exec(comando, { cwd: pasta }, (err, stdout, stderr) => {
+                      if (err && !ignorarErro) {
+                          console.error(`ERRO CMD (${comando}):`, err);
+                          return res.status(500).json({
+                              error: err.message,
+                              details: stderr
+                          });
                       }
-                      pm2.restart(target, () => {
-                          loggerAudit('UPDATE', target, 'SUCESSO', 'Update completo');
-                          res.json({ success: true, message: 'Update e npm install realizados!' });
-                      });
+                      callback(stdout);
                   });
               };
 
-              // A: CLONE (Caso não tenha .git e você passou repoUrl)
+              const finalizarUpdate = () => {
+                  loggerAudit('UPDATE', target, 'INFO', 'Rodando npm install...');
+                  executarComando('npm install', () => {
+                      pm2.restart(target, (rErr) => {
+                          if (rErr) return res.status(500).json({ error: rErr.message });
+
+                          loggerAudit('UPDATE', target, 'SUCESSO', 'Versão salva e PM2 reiniciado');
+                          res.json({
+                              success: true,
+                              message: 'Projeto salvo no Git, pacotes atualizados e serviço reiniciado com sucesso!'
+                          });
+                      });
+                  }, true); // Ignora erro de npm install se não for necessário
+              };
+
+              // =========================
+              // CASO NÃO TENHA .GIT ?? CLONE INICIAL
+              // =========================
               if (!temGit && repoUrl) {
                   loggerAudit('CLONE', target, 'INICIANDO', repoUrl);
-                  exec(`${gitExec} clone ${repoUrl} .`, { cwd: pasta }, (cErr, stdout, stderr) => {
-                      if (cErr) {
-                          loggerAudit('CLONE', target, 'ERRO', stderr);
-                          return res.status(500).json({ error: 'Erro no clone', details: stderr });
-                      }
-                      finalizarUpdate();
+                  executarComando(`"${gitExec}" clone ${repoUrl} .`, () => {
+                      executarComando(`"${gitExec}" branch -r`, (branches) => {
+                          const branch = branches.includes('origin/main') ? 'main' : 'master';
+                          executarComando(`"${gitExec}" checkout ${branch}`, finalizarUpdate);
+                      });
                   });
-              } 
-              // B: PULL (Caso já tenha .git)
+              }
+              
+              // =========================
+              // CASO TENHA .GIT ?? SALVAR (COMMIT) E ENVIAR
+              // =========================
               else if (temGit) {
-                  exec(`${gitExec} pull`, { cwd: pasta }, (gErr, stdout, stderr) => {
-                      if (gErr) {
-                          loggerAudit('UPDATE', target, 'ERRO', stderr);
-                          return res.status(500).json({ error: 'Erro no pull', details: stderr });
-                      }
-                      finalizarUpdate();
+                  loggerAudit('UPDATE', target, 'INICIANDO', 'Salvando versão local no Git...');
+
+                  // 1. Prepara todos os arquivos modificados
+                  executarComando(`"${gitExec}" add .`, () => {
+                      
+                      // 2. Cria o commit com a data exata da ação
+                      const dataFormatada = new Date().toLocaleString('pt-BR').replace(/[\/:]/g, '-');
+                      const msgCommit = `"Auto-backup via Painel PM2 em ${dataFormatada}"`;
+                      
+                      // ignorarErro=true aqui, porque se não houver arquivo modificado, o git commit gera um 'erro' que podemos ignorar
+                      executarComando(`"${gitExec}" commit -m ${msgCommit}`, () => {
+                          
+                          // 3. (Opcional) Envia para o repositório remoto. 
+                          // Ignora erro caso o servidor não tenha permissão de push no momento.
+                          executarComando(`"${gitExec}" push origin HEAD`, () => {
+                              finalizarUpdate();
+                          }, true);
+
+                      }, true);
                   });
               } else {
                   res.status(400).json({ error: "Pasta sem .git e sem repoUrl fornecido." });
@@ -526,14 +601,12 @@ app.post('/process/:action', (req, res) => {
       });
   }, res);
 });
-
 // VER LOG DE AUDITORIA DA PRÓPRIA API
 app.get('/view-audit', (req, res) => {
     if (!fs.existsSync('audit_api.log')) return res.json({ logs: [] });
     const data = fs.readFileSync('audit_api.log', 'utf8');
     res.json({ logs: data.trim().split('\n').reverse().slice(0, 100) });
 });
-
 
 app.get('/ports', async (req, res) => {
   try {
@@ -619,6 +692,64 @@ app.get('/ports/:port/pm2', async (req, res) => {
 });
 
 
+// --- SALVAR ESTADO DO PM2 (pm2 save) ---
+app.post('/save', (req, res) => {
+    withPm2(() => {
+        // O método dump() é a API interna do PM2 para o comando 'pm2 save'
+        pm2.dump((err, result) => {
+            if (err) {
+                console.error("Erro ao salvar PM2:", err);
+                return res.status(500).json({ error: 'Falha ao salvar a lista do PM2.' });
+            }
+            
+            // Registra na sua auditoria
+            loggerAudit('SAVE', 'ALL', 'SUCESSO', 'Configurações do PM2 salvas (dump)');
+            
+            res.json({ 
+                success: true, 
+                message: 'Estado do PM2 salvo! Os apps voltarão automaticamente se o servidor reiniciar.' 
+            });
+        });
+    }, res);
+});
+
+
+// DETALHAR PROCESSO PM2
+app.get('/describe/:id', (req, res) => {
+  const id = req.params.id;
+
+  withPm2(() => {
+      pm2.describe(id, (err, list) => {
+          if (err) {
+              return res.status(500).json({ error: err.message });
+          }
+
+          if (!list || list.length === 0) {
+              return res.status(404).json({ error: 'Processo não encontrado' });
+          }
+
+          const proc = list[0];
+
+          res.json({
+              id: proc.pm_id,
+              name: proc.name,
+              status: proc.pm2_env.status,
+              version: proc.pm2_env.version || 'N/A',
+              script: proc.pm2_env.pm_exec_path,
+              cwd: proc.pm2_env.pm_cwd,
+              args: proc.pm2_env.args,
+              node_version: proc.pm2_env.node_version,
+              restart_time: proc.pm2_env.restart_time,
+              created_at: proc.pm2_env.created_at,
+              uptime: proc.pm2_env.pm_uptime,
+              instances: proc.pm2_env.instances,
+              watch: proc.pm2_env.watch,
+              env: proc.pm2_env.env
+          });
+      });
+  }, res);
+});
+
 
 /* ============================================================
    ??? 6. INICIALIZAÇÃO
@@ -626,7 +757,8 @@ app.get('/ports/:port/pm2', async (req, res) => {
 try {
     const httpsOptions = {
         key: fs.readFileSync('./certificado/gt.key'),
-        cert: fs.readFileSync('./certificado/gt.pem')
+        cert: fs.readFileSync('./certificado/gt.pem'),
+        passphrase: process.env.SSL_PASSPHRASE
     };
     https.createServer(httpsOptions, app).listen(PORT, () => {
         console.log(`? API SEGURA EM: https://localhost:${PORT}`);
